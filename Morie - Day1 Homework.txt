@@ -1,0 +1,152 @@
+♥ 1. correct the settings in VM
+
+♥ 2. power on the VM
+
+♥ 3. un and pw: root/C1sc0123
+
+♥ 4. delete something using script to get an IP
+rm -rf /etc/udev/rules.d/70(tab ka na)
+reboot
+
+♥ 5. dapat may IP address ka na na pwede mo ibrowse ang gui via browser
+for me it's the below,
+IP: 208.8.8.129 (it varies)
+
+♥ 6. find the lab photo of routes
+so you can see the ports and IP addresses to be assigned
+
+♥ 7. telnet to the IP above and port is depending on which instance you want to access/connect to
+
+☺☺☺LAB ☺☺☺
+
+☺ 1.
+HOW TO Configure D1 and D2 as DHCP server for VLAN 10.
+D1: .100-.199
+D2: .200-.254
+
+!@D1
+conf t
+	ip dhcp excluded-address 10.2.1.1 10.2.1.99
+	ip dhcp excluded-address 10.2.1.200 10.2.1.254
+	!
+	ip dhcp pool MGMTPOOL
+		network 10.2.1.0 255.255.255.0
+		default-router 10.2.1.1
+		dns-server 10.2.1.1
+		domain-name MGMT.COM
+		end
+
+!@D2
+conf t
+	ip dhcp excluded-address 10.2.1.1 10.2.1.199
+	!
+	ip dhcp pool MGMTPOOL
+		network 10.2.1.0 255.255.255.0
+		default-router 10.2.1.2
+		dns-server 10.2.1.2
+		domain-name MGMT.COM
+		end
+
+
+☺ 2.
+HOW TO Configure P1 and P2 as DHCP Clients for their VLANs
+
+!@A1
+conf t
+	interface e0/0
+	switchport mode access
+	switchport access vlan 10
+	end
+show vlan brief 
+(A1 should now assign VLAN 10 to its DHCP Clients such as P1)
+
+!@A2
+conf t
+	interface e1/0
+	switchport mode access
+	switchport access vlan 10
+	end
+(A1 should now assign VLAN 10 to its DHCP Clients such as P1)
+
+☺ 3. How to configure P1 and P2 as a DHCP Clients
+!@P1 
+conf t
+	interface e0/0
+	no shut
+	ip add dhcp
+	end
+	
+♣ show ip int brief | ex un
+Interface                  IP-Address      OK? Method Status                Protocol
+Ethernet0/0                10.2.1.200      YES DHCP   up                    up      
+→ assigned dynamically by D1 looking at the current IP
+
+!@P2 
+conf t
+	interface e1/0
+	no shut
+	ip add dhcp
+	end
+
+♣ show ip int brief | ex un
+Interface                  IP-Address      OK? Method Status                Protocol
+Ethernet1/0                10.2.1.101      YES DHCP   up                    up      
+→ assigned dynamically by D2 looking at the current IP
+
+load balancing is working!
+
+
+
+☺ HOW TO  Configure D1 as DHCP Server for VLAN 100
+DHCP Pool name: SERVERPOOL
+	Network: 192.168.1.128 255.255.255.224
+	DG: 192.168.1.129
+	DNS: 192.168.1.129
+	Domain: SERVER.COM
+
+!@D1
+conf t
+	ip dhcp pool SERVERPOOL
+		network 192.168.1.128 255.255.255.224
+		default-router 192.168.1.129
+		dns-server 192.168.1.129
+		domain-name SERVER.COM
+		exit
+	interface e1/0
+	switchport mode access
+	switchport access vlan 100
+	end
+	
+
+
+☺ HOW TO  Configure D2 as DHCP Server for VLAN 20
+DHCP Pool name: DNSPOOL
+	Network: 10.2.2.0 255.255.255.0
+	DG: 10.2.2.2
+	DNS: 10.2.2.2
+	Domain: DNS.COM
+
+!@D2
+conf t
+	ip dhcp pool DNSPOOL
+		network 10.2.2.0 255.255.255.0
+		default-router 10.2.2.2
+		dns-server 10.2.2.2
+		domain-name DNS.COM
+		exit
+	interface e1/0
+	switchport mode access
+	switchport access vlan 20
+	end
+	
+		
+☺ HOW TO Configure S1 and S2 as DHCP Clients for their VLANs
+
+!@S1 and !@S2
+conf t
+	interface e1/0
+	no shut
+	ip add dhcp
+	end
+show ip int brief | ex un
+
