@@ -17,7 +17,7 @@ so you can see the ports and IP addresses to be assigned
 
 ♥ 7. telnet to the IP above and port is depending on which instance you want to access/connect to
 
-☺☺☺LAB ☺☺☺
+☺☺☺LAB☺☺☺
 
 ☺ 1.
 HOW TO Configure D1 and D2 as DHCP server for VLAN 10.
@@ -149,4 +149,5 @@ conf t
 	ip add dhcp
 	end
 show ip int brief | ex un
+
 
